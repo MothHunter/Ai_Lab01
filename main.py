@@ -1,3 +1,4 @@
+from generator import *
 global start
 start = [[1, 4, 2],
          [0, 3, 5],
@@ -6,6 +7,7 @@ start = [[1, 4, 2],
 goal = [[0, 1, 2],
        [3, 4, 5],
        [6, 7, 8]]
+start = generate_puzzle()
 
 def validate_solvable(start_array, goal_array):
     if get_hamming(start_array, goal_array) % 2 != 0:
@@ -75,3 +77,4 @@ if validate_solvable(start, goal) == False:
      print("puzzle is not solvable")
 print(get_hamming(start, goal))
 print(get_manhattan(start, goal))
+print(start)
