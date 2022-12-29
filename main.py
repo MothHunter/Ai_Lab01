@@ -1,19 +1,47 @@
 from generator import *
-global start
-start = [[1, 4, 2],
-         [0, 3, 5],
-         [6, 7, 8]]
+import numpy as np
 
-goal = [[0, 1, 2],
-       [3, 4, 5],
-       [6, 7, 8]]
+
+class Node:
+    def __init__(self, g, h, puzzle):
+        self.g = g
+        self.h = h
+        self.puzzle = puzzle
+
+
+goal = np.array([[0, 1, 2],
+                 [3, 4, 5],
+                 [6, 7, 8]])
+
 start = generate_puzzle()
 
-def validate_solvable(start_array, goal_array):
-    if get_hamming(start_array, goal_array) % 2 != 0:
+
+def validate_solvable(start_array):
+    # puzzle is solvable if number of inversions is even
+    # an inversion is when a number is smaller than a previous number, when reading the array
+    # from top to bottom and left to right (the empty tile 0 is not counted)
+    inversions = 0
+
+    # first, we convert the 2d array to a 1d array, excluding 0
+    start_1d = []
+    for r in range (0,3):
+        for c in range (0,3):
+            if start_array[r][c] != 0:
+                start_1d.append(start_array[r][c])
+
+    # second, we go through the 1d array and compare every number (i) to all following numbers (j)
+    for i in range(0, 8):
+        for j in range(i+1, 8):
+            if start_1d[i] > start_1d[j]:
+                # if the following number is smaller, we have an inversion
+                inversions += 1
+
+    # check if number of inversions is odd (unsolvable) or even (solvable)
+    if inversions % 2 != 0:
         return False
     else:
         return True
+
 
 def validate_move(current_array, direction, previous_move):
     if direction != "up" and direction != "right" and direction != "down" and direction != "left":
@@ -66,15 +94,16 @@ def get_manhattan(start_array, goal_array):
             position_in_goal = get_position(goal_array, start_array[r][c])
             distance += abs(r - position_in_goal[0])
             distance += abs(c - position_in_goal[1])
-            print(start[r][c], position_in_goal)
+            # print(start[r][c], position_in_goal)
     return distance
 
 
 #def solve_8puzzle(start_array, goal_array):
 
 
-if validate_solvable(start, goal) == False:
-     print("puzzle is not solvable")
+if validate_solvable(start) == False:
+    print("puzzle is not solvable")
+
 print(get_hamming(start, goal))
 print(get_manhattan(start, goal))
 print(start)
