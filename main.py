@@ -16,9 +16,9 @@ class Node:
 
 
 # global variables
-goal = np.array([[0, 1, 2],
-                 [3, 4, 5],
-                 [6, 7, 8]])
+goal_state = np.array([[0, 1, 2],
+                       [3, 4, 5],
+                       [6, 7, 8]])
 start = generate_puzzle()
 node_list = []
 n_nodes = 0     # number of nodes created
@@ -28,6 +28,7 @@ n_expanded = 0   # number of expanded nodes
 def expand_node(node, heuristics):
     # the "global" keyword tells the function to use the global variable of this name
     global node_list
+    global goal_state
     global n_nodes
     global n_expanded
     n_expanded += 1
@@ -37,28 +38,28 @@ def expand_node(node, heuristics):
         new_state = numpy.copy(node.puzzle_state)
         new_state[p0[0]][p0[1]] = new_state[p0[0]-1][p0[1]]
         new_state[p0[0] - 1][p0[1]] = 0
-        new_node = Node(node.g+1, heuristics(node.puzzle_state, goal), "up", new_state)
+        new_node = Node(node.g+1, heuristics(node.puzzle_state, goal_state), "up", new_state)
         node_list.append(new_node)
     if validate_move(node, "down"):
         n_nodes += 1
         new_state = numpy.copy(node.puzzle_state)
         new_state[p0[0]][p0[1]] = new_state[p0[0]+1][p0[1]]
         new_state[p0[0] + 1][p0[1]] = 0
-        new_node = Node(node.g + 1, heuristics(node.puzzle_state, goal), "down", new_state)
+        new_node = Node(node.g + 1, heuristics(node.puzzle_state, goal_state), "down", new_state)
         node_list.append(new_node)
     if validate_move(node, "right"):
         n_nodes += 1
         new_state = numpy.copy(node.puzzle_state)
         new_state[p0[0]][p0[1]] = new_state[p0[0]][p0[1]+1]
         new_state[p0[0]][p0[1] + 1] = 0
-        new_node = Node(node.g + 1, heuristics(node.puzzle_state, goal), "right", new_state)
+        new_node = Node(node.g + 1, heuristics(node.puzzle_state, goal_state), "right", new_state)
         node_list.append(new_node)
     if validate_move(node, "left"):
         n_nodes += 1
         new_state = numpy.copy(node.puzzle_state)
         new_state[p0[0]][p0[1]] = new_state[p0[0]][p0[1]-1]
         new_state[p0[0]][p0[1] - 1] = 0
-        new_node = Node(node.g + 1, heuristics(node.puzzle_state, goal), "left", new_state)
+        new_node = Node(node.g + 1, heuristics(node.puzzle_state, goal_state), "left", new_state)
         node_list.append(new_node)
 
 
@@ -155,9 +156,12 @@ def get_position(puzzle_array, number):
 #def solve_8puzzle(start_array, goal_array):
 
 
+# test run for one expansion of start node
+print(start)
 if validate_solvable(start) == False:
     print("puzzle is not solvable")
-
-print(get_hamming(start, goal))
-print(get_manhattan(start, goal))
-print(start)
+else:
+    start_node = Node(0, get_hamming(start, goal_state), "none", start)
+    expand_node(start_node, get_hamming)
+    for node in node_list:
+        print(node.puzzle_state)
