@@ -7,6 +7,7 @@ class Node:
         self.g = g
         self.h = h
         # previous move is encoded as "up", "down", "left", "right"
+        # for initial node use "none" as previous move
         # used to avoid cycling back and forth between two states
         self.previous_move = previous_move
         self.puzzle_state = puzzle_state
@@ -53,7 +54,7 @@ def validate_move(node, direction):
         return False
     # check for errors in previous_direction encoding
     if (node.previous_move != "up" and node.previous_move != "right" and node.previous_move != "down" and
-            node.previous_move != "left"):
+            node.previous_move != "left" and previous_move != "none"):
         print("invalid previous_direction")
         return False
     # get column and row of the empty tile, to check in which direction we can move it
