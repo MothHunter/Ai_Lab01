@@ -1,3 +1,5 @@
+import numpy
+
 from generator import *
 import numpy as np
 
@@ -18,6 +20,17 @@ goal = np.array([[0, 1, 2],
                  [3, 4, 5],
                  [6, 7, 8]])
 start = generate_puzzle()
+node_list = []
+
+
+def expand_node(node, heuristics):
+    p0 = get_position(node.puzzle_state, 0)
+    if validate_move(node, "up"):
+        new_state = numpy.copy(node.puzzle_state)
+        new_state[p0[0]][p0[1]] = new_state[p0[0]-1][p0[1]]
+        new_state[p0[0] - 1][p0[1]] = 0
+        new_node = Node(node.g+1, heuristics(node.puzzle_state, goal), "up", new_state)
+        node_list.append(new_node)
 
 
 def validate_solvable(start_array):
@@ -54,7 +67,7 @@ def validate_move(node, direction):
         return False
     # check for errors in previous_direction encoding
     if (node.previous_move != "up" and node.previous_move != "right" and node.previous_move != "down" and
-            node.previous_move != "left" and previous_move != "none"):
+            node.previous_move != "left" and node.previous_move != "none"):
         print("invalid previous_direction")
         return False
     # get column and row of the empty tile, to check in which direction we can move it
@@ -62,19 +75,19 @@ def validate_move(node, direction):
     column_of_0 = 0
     for r in range(0, 3):
         for c in range(0, 3):
-            if current_array[r][c] == 0:
+            if node.puzzle_state[r][c] == 0:
                 row_of_0 = r
                 column_of_0 = c
                 break
     # check if move is possible
-    if direction == "up" and row_of_0 > 0 and previous_move != "down":
+    if direction == "up" and row_of_0 > 0 and node.previous_move != "down":
         # wir sind nicht in der obersten Zeile und sind davor nicht nach unten gegangen => "up" ist möglich
         return True
-    if direction == "right" and column_of_0 < 2 and previous_move != "left":
+    if direction == "right" and column_of_0 < 2 and node.previous_move != "left":
         return True
-    if direction == "down" and row_of_0 < 2 and previous_move != "up":
+    if direction == "down" and row_of_0 < 2 and node.previous_move != "up":
         return True
-    if direction == "left" and column_of_0 > 0 and previous_move != "right":
+    if direction == "left" and column_of_0 > 0 and node.previous_move != "right":
         return True
     else:
         return False
