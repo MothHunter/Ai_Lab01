@@ -21,39 +21,45 @@ goal = np.array([[0, 1, 2],
                  [6, 7, 8]])
 start = generate_puzzle()
 node_list = []
-
+n_nodes = 0     # number of nodes created
+n_expanded = 0   # number of expanded nodes
 
 
 def expand_node(node, heuristics):
+    # the "global" keyword tells the function to use the global variable of this name
+    global node_list
+    global n_nodes
+    global n_expanded
+    n_expanded += 1
     p0 = get_position(node.puzzle_state, 0)
     if validate_move(node, "up"):
+        n_nodes += 1
         new_state = numpy.copy(node.puzzle_state)
         new_state[p0[0]][p0[1]] = new_state[p0[0]-1][p0[1]]
         new_state[p0[0] - 1][p0[1]] = 0
         new_node = Node(node.g+1, heuristics(node.puzzle_state, goal), "up", new_state)
         node_list.append(new_node)
     if validate_move(node, "down"):
+        n_nodes += 1
         new_state = numpy.copy(node.puzzle_state)
         new_state[p0[0]][p0[1]] = new_state[p0[0]+1][p0[1]]
         new_state[p0[0] + 1][p0[1]] = 0
         new_node = Node(node.g + 1, heuristics(node.puzzle_state, goal), "down", new_state)
         node_list.append(new_node)
     if validate_move(node, "right"):
+        n_nodes += 1
         new_state = numpy.copy(node.puzzle_state)
         new_state[p0[0]][p0[1]] = new_state[p0[0]][p0[1]+1]
         new_state[p0[0]][p0[1] + 1] = 0
         new_node = Node(node.g + 1, heuristics(node.puzzle_state, goal), "right", new_state)
         node_list.append(new_node)
     if validate_move(node, "left"):
+        n_nodes += 1
         new_state = numpy.copy(node.puzzle_state)
         new_state[p0[0]][p0[1]] = new_state[p0[0]][p0[1]-1]
         new_state[p0[0]][p0[1] - 1] = 0
         new_node = Node(node.g + 1, heuristics(node.puzzle_state, goal), "left", new_state)
         node_list.append(new_node)
-
-
-
-
 
 
 def validate_solvable(start_array):
@@ -134,7 +140,6 @@ def get_manhattan(start_array, goal_array):
             position_in_goal = get_position(goal_array, start_array[r][c])
             distance += abs(r - position_in_goal[0])
             distance += abs(c - position_in_goal[1])
-            # print(start[r][c], position_in_goal)
     return distance
 
 
