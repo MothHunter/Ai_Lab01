@@ -23,6 +23,7 @@ start = generate_puzzle()
 node_list = []
 
 
+
 def expand_node(node, heuristics):
     p0 = get_position(node.puzzle_state, 0)
     if validate_move(node, "up"):
@@ -31,6 +32,28 @@ def expand_node(node, heuristics):
         new_state[p0[0] - 1][p0[1]] = 0
         new_node = Node(node.g+1, heuristics(node.puzzle_state, goal), "up", new_state)
         node_list.append(new_node)
+    if validate_move(node, "down"):
+        new_state = numpy.copy(node.puzzle_state)
+        new_state[p0[0]][p0[1]] = new_state[p0[0]+1][p0[1]]
+        new_state[p0[0] + 1][p0[1]] = 0
+        new_node = Node(node.g + 1, heuristics(node.puzzle_state, goal), "down", new_state)
+        node_list.append(new_node)
+    if validate_move(node, "right"):
+        new_state = numpy.copy(node.puzzle_state)
+        new_state[p0[0]][p0[1]] = new_state[p0[0]][p0[1]+1]
+        new_state[p0[0]][p0[1] + 1] = 0
+        new_node = Node(node.g + 1, heuristics(node.puzzle_state, goal), "right", new_state)
+        node_list.append(new_node)
+    if validate_move(node, "left"):
+        new_state = numpy.copy(node.puzzle_state)
+        new_state[p0[0]][p0[1]] = new_state[p0[0]][p0[1]-1]
+        new_state[p0[0]][p0[1] - 1] = 0
+        new_node = Node(node.g + 1, heuristics(node.puzzle_state, goal), "left", new_state)
+        node_list.append(new_node)
+
+
+
+
 
 
 def validate_solvable(start_array):
@@ -41,8 +64,8 @@ def validate_solvable(start_array):
 
     # first, we convert the 2d array to a 1d array, excluding 0
     start_1d = []
-    for r in range (0,3):
-        for c in range (0,3):
+    for r in range(0, 3):
+        for c in range(0, 3):
             if start_array[r][c] != 0:
                 start_1d.append(start_array[r][c])
 
