@@ -3,10 +3,13 @@ import numpy as np
 
 
 class Node:
-    def __init__(self, g, h, puzzle):
+    def __init__(self, g, h, previous_move, puzzle_state):
         self.g = g
         self.h = h
-        self.puzzle = puzzle
+        # previous move is encoded as "up", "down", "left", "right"
+        # used to avoid cycling back and forth between two states
+        self.previous_move = previous_move
+        self.puzzle_state = puzzle_state
 
 
 goal = np.array([[0, 1, 2],
