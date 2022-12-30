@@ -12,10 +12,10 @@ class Node:
         self.puzzle_state = puzzle_state
 
 
+# global variables
 goal = np.array([[0, 1, 2],
                  [3, 4, 5],
                  [6, 7, 8]])
-
 start = generate_puzzle()
 
 
@@ -46,21 +46,26 @@ def validate_solvable(start_array):
         return True
 
 
-def validate_move(current_array, direction, previous_move):
+def validate_move(node, direction):
+    # check for errors in direction encoding
     if direction != "up" and direction != "right" and direction != "down" and direction != "left":
         print("invalid direction")
         return False
-    if previous_move != "up" and previous_move != "right" and previous_move != "down" and previous_move != "left":
+    # check for errors in previous_direction encoding
+    if (node.previous_move != "up" and node.previous_move != "right" and node.previous_move != "down" and
+            node.previous_move != "left"):
         print("invalid previous_direction")
         return False
-    row_of_0 = 0 # variable muss einen Startwert haben
+    # get column and row of the empty tile, to check in which direction we can move it
+    row_of_0 = 0
     column_of_0 = 0
     for r in range(0, 3):
         for c in range(0, 3):
             if current_array[r][c] == 0:
                 row_of_0 = r
                 column_of_0 = c
-                break;
+                break
+    # check if move is possible
     if direction == "up" and row_of_0 > 0 and previous_move != "down":
         # wir sind nicht in der obersten Zeile und sind davor nicht nach unten gegangen => "up" ist möglich
         return True
@@ -73,6 +78,8 @@ def validate_move(current_array, direction, previous_move):
     else:
         return False
 
+
+# calculate the hamming distance
 def get_hamming(start_array, goal_array):
     difference = 0
     for r in range(0, 3):
@@ -82,14 +89,7 @@ def get_hamming(start_array, goal_array):
     return difference
 
 
-def get_position(puzzle_array, zahl):
-    for r in range(0, 3):
-        for c in range(0, 3):
-            if puzzle_array[r][c] == zahl:
-                return [r, c]
-    return False
-
-
+# calculate manhattan distance
 def get_manhattan(start_array, goal_array):
     distance = 0
     for r in range(0, 3):
@@ -99,6 +99,15 @@ def get_manhattan(start_array, goal_array):
             distance += abs(c - position_in_goal[1])
             # print(start[r][c], position_in_goal)
     return distance
+
+
+# find the position of a specific number in the array
+def get_position(puzzle_array, number):
+    for r in range(0, 3):
+        for c in range(0, 3):
+            if puzzle_array[r][c] == number:
+                return [r, c]
+    return False
 
 
 #def solve_8puzzle(start_array, goal_array):
