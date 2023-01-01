@@ -1,4 +1,5 @@
 import numpy
+import timeit
 
 from generator import *
 import numpy as np
@@ -23,6 +24,11 @@ goal_state = np.array([[0, 1, 2],
                        [6, 7, 8]])
 n_nodes = 0     # number of nodes created
 n_expanded = 0   # number of expanded nodes
+hamming_time = numpy.zeros(100)
+hamming_nodes = numpy.zeros(100)
+manhattan_time = numpy.zeros(100)
+manhattan_nodes = numpy.zeros(100)
+counter = 0
 
 
 def expand_node(n, heuristics, node_list):
@@ -156,31 +162,51 @@ def get_position(puzzle_array, number):
     return False
 
 
-
-
 def get_cost(node):
     return node.g + node.h
 
 
-def solve_8puzzle(current_node, goal_array, heuristics):
+def solve_8puzzle(start_state, heuristics):
+    current_node = Node(0, heuristics(start_state, goal_state), "none", start_state, None)
     node_list = [current_node, ]
-    print("node list length: " + str(len(node_list)))
+    global n_nodes
+    n_nodes = 0
+    start_time = timeit.timeit()
     while current_node.h != 0:
         expand_node(current_node, heuristics, node_list)
         node_list.remove(current_node)
         node_list.sort(key=get_cost)
         current_node = node_list[0]
+    end_time = timeit.timeit()
+    if heuristics == get_hamming:
+        global hamming_time
+        hamming_time[counter] = end_time - start_time
+        hamming_nodes[counter] = n_nodes
+    elif heuristics == get_manhattan:
+        global manhattan_time
+        manhattan_time[counter] = end_time - start_time
+        manhattan_nodes[counter] = n_nodes
+    else:
+        print("uh oh")
 
 
-def solve100(heuristics):
+def solve100():
+    global counter
     counter = 0
     while counter < 100:
         start_state = generate_puzzle()
         if validate_solvable(start_state):
-            start_node = Node(0, heuristics(start_state, goal_state), "none", start_state, None)
-            solve_8puzzle(start_node, goal_state, heuristics)
+            solve_8puzzle(start_state, get_hamming)
+            solve_8puzzle(start_state, get_manhattan)
             counter += 1
             print(counter)
 
 
-solve100(get_hamming)
+solve100()
+print("hamming:")
+print("avg. time: %d", numpy.sum(hamming_time)/100)
+print("avg. nodes: %d", numpy.sum(hamming_nodes)/100)
+print("manhattan:")
+print("avg. time: %d", numpy.sum(manhattan_time)/100)
+print("avg. nodes: %d", numpy.sum(manhattan_nodes)/100)
+
