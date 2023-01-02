@@ -38,7 +38,7 @@ manhattan_nodes = numpy.zeros(100)
 counter = 0
 
 
-def expand_node(n, heuristics, node_queue, known_states):
+def expand_node(n, heuristics, sub_problem, node_queue, known_states):
     # the "global" keyword tells the function to use the global variable of this name
     global goal_state
     global n_nodes
@@ -51,7 +51,7 @@ def expand_node(n, heuristics, node_queue, known_states):
         new_state[p0[0]][p0[1]] = new_state[p0[0]-1][p0[1]]
         new_state[p0[0] - 1][p0[1]] = 0
         if known_states.get(hash_puzzle(new_state)) is None:
-            new_node = Node(n.g + 1, heuristics(new_state, goal_state), "up", new_state, n)
+            new_node = Node(n.g + 1, heuristics(new_state, goal_state, sub_problem), "up", new_state, n)
             node_queue.put(new_node)
             n.child_nodes.append(new_node)
             known_states[hash_puzzle(new_state)] = True
@@ -61,7 +61,7 @@ def expand_node(n, heuristics, node_queue, known_states):
         new_state[p0[0]][p0[1]] = new_state[p0[0]+1][p0[1]]
         new_state[p0[0] + 1][p0[1]] = 0
         if known_states.get(hash_puzzle(new_state)) is None:
-            new_node = Node(n.g + 1, heuristics(new_state, goal_state), "down", new_state, n)
+            new_node = Node(n.g + 1, heuristics(new_state, goal_state, sub_problem), "down", new_state, n)
             node_queue.put(new_node)
             n.child_nodes.append(new_node)
             known_states[hash_puzzle(new_state)] = True
@@ -71,7 +71,7 @@ def expand_node(n, heuristics, node_queue, known_states):
         new_state[p0[0]][p0[1]] = new_state[p0[0]][p0[1]+1]
         new_state[p0[0]][p0[1] + 1] = 0
         if known_states.get(hash_puzzle(new_state)) is None:
-            new_node = Node(n.g + 1, heuristics(new_state, goal_state), "right", new_state, n)
+            new_node = Node(n.g + 1, heuristics(new_state, goal_state, sub_problem), "right", new_state, n)
             node_queue.put(new_node)
             n.child_nodes.append(new_node)
             known_states[hash_puzzle(new_state)] = True
@@ -81,7 +81,7 @@ def expand_node(n, heuristics, node_queue, known_states):
         new_state[p0[0]][p0[1]] = new_state[p0[0]][p0[1]-1]
         new_state[p0[0]][p0[1] - 1] = 0
         if known_states.get(hash_puzzle(new_state)) is None:
-            new_node = Node(n.g + 1, heuristics(new_state, goal_state), "left", new_state, n)
+            new_node = Node(n.g + 1, heuristics(new_state, goal_state, sub_problem), "left", new_state, n)
             node_queue.put(new_node)
             n.child_nodes.append(new_node)
             known_states[hash_puzzle(new_state)] = True
@@ -217,7 +217,8 @@ def solve_8puzzle(start_state, heuristics):
         else:
             expand_node(current_node, heuristics, True, node_queue, known_states)
             current_node = node_queue.get()
-            if (heuristics == get_hamming and current_node.h <= 6) or (heuristics == get_manhattan and current_node.h <= 19):
+            if (heuristics == get_hamming and current_node.h <= 6) or \
+                    (heuristics == get_manhattan and current_node.h <= 19):
                 sub_problem_solved = True
 
     end_time = time.time()
