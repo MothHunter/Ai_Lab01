@@ -26,14 +26,14 @@ class Node:
 # global variables
 goal_state = numpy.array([[0, 1, 2],
                           [3, 4, 5],
-                          [6, 7, 8]])
-n_nodes = 0     # number of nodes created
-n_expanded = 0   # number of expanded nodes
-hamming_time = numpy.zeros(100)
-hamming_nodes = numpy.zeros(100)
-manhattan_time = numpy.zeros(100)
-manhattan_nodes = numpy.zeros(100)
-counter = 0
+                          [6, 7, 8]])   # the state in which the puzzle counts as solved
+n_nodes = 0                         # number of nodes created while solving a single puzzle
+n_expanded = 0                      # number of expanded nodes while solving a single puzzle
+hamming_time = numpy.zeros(100)     # array for storing hamming solve times
+hamming_nodes = numpy.zeros(100)    # array for storing hamming node numbers
+manhattan_time = numpy.zeros(100)   # array for storing manhattan solve times
+manhattan_nodes = numpy.zeros(100)  # array for storing manhattan node numbers
+counter = 0                         # counter for solved puzzles of this run
 
 
 def expand_node(n, heuristics, sub_problem, node_queue, known_states):
@@ -146,6 +146,12 @@ def validate_move(node, direction):
 
 
 # calculate the hamming distance
+# if sub_problem is true, only the lower row of the puzzle is considered
+# parameters:
+# - current_array (3x3 int numpy array): current state of the puzzle
+# - goal_array (3x3 int numpy array): solved state of the puzzle
+# - sub_problem (boolean): True = only solve lower row; False = solve whole puzzle
+# return value (int): distance
 def get_hamming(start_array, goal_array, sub_problem):
     difference = 0
     if sub_problem:
