@@ -3,6 +3,7 @@ import timeit
 
 from generator import *
 import time
+from queue import PriorityQueue
 import numpy as np
 
 
@@ -18,6 +19,12 @@ class Node:
         self.parent_node = parent_node
         self.child_nodes = []
 
+    def __lt__(self, other):
+        return get_cost(self) < get_cost(other)
+
+    def __eq__(self, other):
+        return get_cost(self) == get_cost(other)
+
 
 # global variables
 goal_state = np.array([[0, 1, 2],
@@ -32,7 +39,7 @@ manhattan_nodes = numpy.zeros(100)
 counter = 0
 
 
-def expand_node(n, heuristics, node_list, known_states):
+def expand_node(n, heuristics, node_queue, known_states):
     # the "global" keyword tells the function to use the global variable of this name
     global goal_state
     global n_nodes
@@ -46,7 +53,7 @@ def expand_node(n, heuristics, node_list, known_states):
         new_state[p0[0] - 1][p0[1]] = 0
         if known_states.get(hash_puzzle(new_state)) is None:
             new_node = Node(n.g + 1, heuristics(new_state, goal_state), "up", new_state, n)
-            node_list.append(new_node)
+            node_queue.put(new_node)
             n.child_nodes.append(new_node)
             known_states[hash_puzzle(new_state)] = True
     if validate_move(n, "down"):
@@ -56,7 +63,7 @@ def expand_node(n, heuristics, node_list, known_states):
         new_state[p0[0] + 1][p0[1]] = 0
         if known_states.get(hash_puzzle(new_state)) is None:
             new_node = Node(n.g + 1, heuristics(new_state, goal_state), "down", new_state, n)
-            node_list.append(new_node)
+            node_queue.put(new_node)
             n.child_nodes.append(new_node)
             known_states[hash_puzzle(new_state)] = True
     if validate_move(n, "right"):
@@ -66,7 +73,7 @@ def expand_node(n, heuristics, node_list, known_states):
         new_state[p0[0]][p0[1] + 1] = 0
         if known_states.get(hash_puzzle(new_state)) is None:
             new_node = Node(n.g + 1, heuristics(new_state, goal_state), "right", new_state, n)
-            node_list.append(new_node)
+            node_queue.put(new_node)
             n.child_nodes.append(new_node)
             known_states[hash_puzzle(new_state)] = True
     if validate_move(n, "left"):
@@ -76,7 +83,7 @@ def expand_node(n, heuristics, node_list, known_states):
         new_state[p0[0]][p0[1] - 1] = 0
         if known_states.get(hash_puzzle(new_state)) is None:
             new_node = Node(n.g + 1, heuristics(new_state, goal_state), "left", new_state, n)
-            node_list.append(new_node)
+            node_queue.put(new_node)
             n.child_nodes.append(new_node)
             known_states[hash_puzzle(new_state)] = True
 
@@ -184,16 +191,16 @@ def get_cost(node):
 
 def solve_8puzzle(start_state, heuristics):
     current_node = Node(0, heuristics(start_state, goal_state), "none", start_state, None)
-    node_list = [current_node, ]
+    node_queue = PriorityQueue()
+    # node_queue.put(get_cost(current_node), current_node)
     known_states = {hash_puzzle(start_state): True}
     global n_nodes
     n_nodes = 0
     start_time = time.time()
     while current_node.h != 0:
-        expand_node(current_node, heuristics, node_list, known_states)
-        del node_list[0]
-        node_list.sort(key=get_cost)
-        current_node = node_list[0]
+        expand_node(current_node, heuristics, node_queue, known_states)
+        current_node = node_queue.get()
+
     end_time = time.time()
     if heuristics == get_hamming:
         global hamming_time
