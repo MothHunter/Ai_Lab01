@@ -38,6 +38,11 @@ manhattan_nodes = numpy.zeros(100)  # array for storing manhattan node numbers
 counter = 0                         # counter for solved puzzles of this run
 
 
+def generate_puzzle():
+    random_generator_puzzle = numpy.random.choice(numpy.arange(9), size=(3, 3), replace=False)
+    return random_generator_puzzle
+
+
 # expand_node to creat all possible next  steps puzzle state from the given state
 # if the move in one or more direction possible it creat the node
 # parameters:
@@ -274,6 +279,7 @@ def solve_8puzzle(start_state, heuristics):
 
 # main function tying everything together
 def solve100():
+    print("solving 100 puzzles...")
     global counter
     counter = 0
     while counter < 100:
@@ -282,15 +288,16 @@ def solve100():
             solve_8puzzle(start_state, get_hamming)
             solve_8puzzle(start_state, get_manhattan)
             counter += 1
-            print(counter)
+            if counter % 10 == 0:
+                print(counter)
 
 
 def standard_deviation(value_array):
     mean = numpy.sum(value_array)/100
     sum_of_squares = 0
     for i in range(0, 100):
-        sum_of_squares += math.pow(value_array[0] - mean, 2)
-    variance = numpy.sum(sum_of_squares/100)
+        sum_of_squares += math.pow(value_array[i] - mean, 2)
+    variance = numpy.sum(sum_of_squares)/100
     deviation = math.sqrt(variance)
     return deviation
 
@@ -300,10 +307,12 @@ solve100()
 # print results
 print("hamming:")
 print("avg. time: ", numpy.sum(hamming_time)/100)
+print("SD time: ", standard_deviation(hamming_time))
 print("avg. nodes: ", numpy.sum(hamming_nodes)/100)
+print("SD nodes: ", standard_deviation(hamming_nodes))
 print("manhattan:")
 print("avg. time: ", numpy.sum(manhattan_time)/100)
+print("SD time: ", standard_deviation(manhattan_time))
 print("avg. nodes: ", numpy.sum(manhattan_nodes)/100)
-print("standard deviation: ", standard_deviation(hamming_time))
-print("standard deviation: ", standard_deviation(manhattan_time))
+print("SD nodes: ", standard_deviation(manhattan_nodes))
 
