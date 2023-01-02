@@ -2,6 +2,7 @@ import numpy
 import timeit
 
 from generator import *
+import time
 import numpy as np
 
 
@@ -31,7 +32,7 @@ manhattan_nodes = numpy.zeros(100)
 counter = 0
 
 
-def expand_node(n, heuristics, node_list):
+def expand_node(n, heuristics, node_list, known_states):
     # the "global" keyword tells the function to use the global variable of this name
     global goal_state
     global n_nodes
@@ -43,33 +44,41 @@ def expand_node(n, heuristics, node_list):
         new_state = numpy.copy(n.puzzle_state)
         new_state[p0[0]][p0[1]] = new_state[p0[0]-1][p0[1]]
         new_state[p0[0] - 1][p0[1]] = 0
-        new_node = Node(n.g + 1, heuristics(new_state, goal_state), "up", new_state, n)
-        node_list.append(new_node)
-        n.child_nodes.append(new_node)
+        if known_states.get(hash_puzzle(new_state)) is None:
+            new_node = Node(n.g + 1, heuristics(new_state, goal_state), "up", new_state, n)
+            node_list.append(new_node)
+            n.child_nodes.append(new_node)
+            known_states[hash_puzzle(new_state)] = True
     if validate_move(n, "down"):
         n_nodes += 1
         new_state = numpy.copy(n.puzzle_state)
         new_state[p0[0]][p0[1]] = new_state[p0[0]+1][p0[1]]
         new_state[p0[0] + 1][p0[1]] = 0
-        new_node = Node(n.g + 1, heuristics(new_state, goal_state), "down", new_state, n)
-        node_list.append(new_node)
-        n.child_nodes.append(new_node)
+        if known_states.get(hash_puzzle(new_state)) is None:
+            new_node = Node(n.g + 1, heuristics(new_state, goal_state), "down", new_state, n)
+            node_list.append(new_node)
+            n.child_nodes.append(new_node)
+            known_states[hash_puzzle(new_state)] = True
     if validate_move(n, "right"):
         n_nodes += 1
         new_state = numpy.copy(n.puzzle_state)
         new_state[p0[0]][p0[1]] = new_state[p0[0]][p0[1]+1]
         new_state[p0[0]][p0[1] + 1] = 0
-        new_node = Node(n.g + 1, heuristics(new_state, goal_state), "right", new_state, n)
-        node_list.append(new_node)
-        n.child_nodes.append(new_node)
+        if known_states.get(hash_puzzle(new_state)) is None:
+            new_node = Node(n.g + 1, heuristics(new_state, goal_state), "right", new_state, n)
+            node_list.append(new_node)
+            n.child_nodes.append(new_node)
+            known_states[hash_puzzle(new_state)] = True
     if validate_move(n, "left"):
         n_nodes += 1
         new_state = numpy.copy(n.puzzle_state)
         new_state[p0[0]][p0[1]] = new_state[p0[0]][p0[1]-1]
         new_state[p0[0]][p0[1] - 1] = 0
-        new_node = Node(n.g + 1, heuristics(new_state, goal_state), "left", new_state, n)
-        node_list.append(new_node)
-        n.child_nodes.append(new_node)
+        if known_states.get(hash_puzzle(new_state)) is None:
+            new_node = Node(n.g + 1, heuristics(new_state, goal_state), "left", new_state, n)
+            node_list.append(new_node)
+            n.child_nodes.append(new_node)
+            known_states[hash_puzzle(new_state)] = True
 
 
 def validate_solvable(start_array):
@@ -153,6 +162,13 @@ def get_manhattan(start_array, goal_array):
     return distance
 
 
+def hash_puzzle(p):
+    hash = (p[0][0] * 100000000 + p[0][1] * 10000000 + p[0][2] * 1000000
+            + p[1][0] * 100000 + p[1][1] * 10000 + p[1][2] * 1000
+            + p[2][0] * 100 + p[2][1] * 10 + p[2][2])
+    return hash
+
+
 # find the position of a specific number in the array
 def get_position(puzzle_array, number):
     for r in range(0, 3):
@@ -169,15 +185,16 @@ def get_cost(node):
 def solve_8puzzle(start_state, heuristics):
     current_node = Node(0, heuristics(start_state, goal_state), "none", start_state, None)
     node_list = [current_node, ]
+    known_states = {hash_puzzle(start_state): True}
     global n_nodes
     n_nodes = 0
-    start_time = timeit.timeit()
+    start_time = time.time()
     while current_node.h != 0:
-        expand_node(current_node, heuristics, node_list)
+        expand_node(current_node, heuristics, node_list, known_states)
         del node_list[0]
         node_list.sort(key=get_cost)
         current_node = node_list[0]
-    end_time = timeit.timeit()
+    end_time = time.time()
     if heuristics == get_hamming:
         global hamming_time
         hamming_time[counter] = end_time - start_time
@@ -204,9 +221,9 @@ def solve100():
 
 solve100()
 print("hamming:")
-print("avg. time: %d", numpy.sum(hamming_time)/100)
-print("avg. nodes: %d", numpy.sum(hamming_nodes)/100)
+print("avg. time: ", numpy.sum(hamming_time)/100)
+print("avg. nodes: ", numpy.sum(hamming_nodes)/100)
 print("manhattan:")
-print("avg. time: %d", numpy.sum(manhattan_time)/100)
-print("avg. nodes: %d", numpy.sum(manhattan_nodes)/100)
+print("avg. time: ", numpy.sum(manhattan_time)/100)
+print("avg. nodes: ", numpy.sum(manhattan_nodes)/100)
 
