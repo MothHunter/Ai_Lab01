@@ -4,7 +4,6 @@ import timeit
 from generator import *
 import time
 from queue import PriorityQueue
-import numpy as np
 
 
 class Node:
@@ -27,9 +26,9 @@ class Node:
 
 
 # global variables
-goal_state = np.array([[0, 1, 2],
-                       [3, 4, 5],
-                       [6, 7, 8]])
+goal_state = numpy.array([[0, 1, 2],
+                          [3, 4, 5],
+                          [6, 7, 8]])
 n_nodes = 0     # number of nodes created
 n_expanded = 0   # number of expanded nodes
 hamming_time = numpy.zeros(100)
