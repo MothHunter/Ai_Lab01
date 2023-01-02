@@ -36,6 +36,14 @@ manhattan_nodes = numpy.zeros(100)  # array for storing manhattan node numbers
 counter = 0                         # counter for solved puzzles of this run
 
 
+# expand_node to creat all possible next  steps puzzle state from the given state
+# if the move in one or more direction possible it creat the node
+# parameters:
+#  - n(Node) the node for expantion
+#  - heuristics (function) is for manhattan or hamming
+#  - sub_problem (boolean) true: use sub_problem version of the distance function
+#  - node_queue (priority Queue)
+#  - Known_state (dictionary) key is the hash puzzle function and the value is boolean(true)
 def expand_node(n, heuristics, sub_problem, node_queue, known_states):
     # the "global" keyword tells the function to use the global variable of this name
     global goal_state
@@ -45,9 +53,11 @@ def expand_node(n, heuristics, sub_problem, node_queue, known_states):
     p0 = get_position(n.puzzle_state, 0)
     if validate_move(n, "up"):
         n_nodes += 1
-        new_state = numpy.copy(n.puzzle_state)
+        new_state = numpy.copy(n.puzzle_state)   # copy the current puzzle
+        # change the state of the field zero to possible location (after move)
         new_state[p0[0]][p0[1]] = new_state[p0[0]-1][p0[1]]
         new_state[p0[0] - 1][p0[1]] = 0
+        # if this new state of puzzle does not exist in hash map then create node and add it to the Queue
         if known_states.get(hash_puzzle(new_state)) is None:
             new_node = Node(n.g + 1, heuristics(new_state, goal_state, sub_problem), new_state, n)
             node_queue.put(new_node)
