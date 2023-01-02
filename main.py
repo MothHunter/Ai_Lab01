@@ -174,7 +174,7 @@ def solve_8puzzle(start_state, heuristics):
     start_time = timeit.timeit()
     while current_node.h != 0:
         expand_node(current_node, heuristics, node_list)
-        node_list.remove(current_node)
+        del node_list[0]
         node_list.sort(key=get_cost)
         current_node = node_list[0]
     end_time = timeit.timeit()
