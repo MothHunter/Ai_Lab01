@@ -1,26 +1,24 @@
 import numpy
-import timeit
-
-from generator import *
 import time
 from queue import PriorityQueue
 
+from generator import *
 
+
+# class for nodes in the search-tree
 class Node:
-    def __init__(self, g, h, previous_move, puzzle_state, parent_node):
-        self.g = g
-        self.h = h
-        # previous move is encoded as "up", "down", "left", "right"
-        # for initial node use "none" as previous move
-        # used to avoid cycling back and forth between two states
-        self.previous_move = previous_move
-        self.puzzle_state = puzzle_state
-        self.parent_node = parent_node
-        self.child_nodes = []
+    def __init__(self, g, h, puzzle_state, parent_node):
+        self.g = g  # cost (number of moves) accumulated to reach this node
+        self.h = h  # estimation of cost to reach the goal state from this node
+        self.puzzle_state = puzzle_state    # current state of the puzzle
+        self.parent_node = parent_node      # parent node of this node (for backtracking)
+        self.child_nodes = []               # child nodes of this node
 
+    # "less than" function needed for comparison when sorting queue of nodes
     def __lt__(self, other):
         return get_cost(self) < get_cost(other)
 
+    # "equal to" function needed for comparison when sorting queue of nodes
     def __eq__(self, other):
         return get_cost(self) == get_cost(other)
 
