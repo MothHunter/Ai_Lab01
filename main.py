@@ -148,23 +148,36 @@ def validate_move(node, direction):
 
 
 # calculate the hamming distance
-def get_hamming(start_array, goal_array):
+def get_hamming(start_array, goal_array, sub_problem):
     difference = 0
-    for r in range(0, 3):
+    if sub_problem:
+        difference = 6
         for c in range(0, 3):
-            if start_array[r][c] != goal_array[r][c]:
+            if start_array[2][c] != goal_array[2][c]:
                 difference += 1
+    else:
+        for r in range(0, 3):
+            for c in range(0, 3):
+                if start_array[r][c] != goal_array[r][c]:
+                    difference += 1
     return difference
 
 
 # calculate manhattan distance
-def get_manhattan(start_array, goal_array):
+def get_manhattan(start_array, goal_array, sub_problem):
     distance = 0
-    for r in range(0, 3):
+    if sub_problem:
+        distance = 19
         for c in range(0, 3):
-            position_in_goal = get_position(goal_array, start_array[r][c])
-            distance += abs(r - position_in_goal[0])
+            position_in_goal = get_position(goal_array, start_array[2][c])
+            distance += abs(2 - position_in_goal[0])
             distance += abs(c - position_in_goal[1])
+    else:
+        for r in range(0, 3):
+            for c in range(0, 3):
+                position_in_goal = get_position(goal_array, start_array[r][c])
+                distance += abs(r - position_in_goal[0])
+                distance += abs(c - position_in_goal[1])
     return distance
 
 
@@ -189,16 +202,23 @@ def get_cost(node):
 
 
 def solve_8puzzle(start_state, heuristics):
-    current_node = Node(0, heuristics(start_state, goal_state), "none", start_state, None)
+    current_node = Node(0, heuristics(start_state, goal_state, True), "none", start_state, None)
     node_queue = PriorityQueue()
     # node_queue.put(get_cost(current_node), current_node)
     known_states = {hash_puzzle(start_state): True}
     global n_nodes
     n_nodes = 0
     start_time = time.time()
+    sub_problem_solved = False
     while current_node.h != 0:
-        expand_node(current_node, heuristics, node_queue, known_states)
-        current_node = node_queue.get()
+        if sub_problem_solved:
+            expand_node(current_node, heuristics, False, node_queue, known_states)
+            current_node = node_queue.get()
+        else:
+            expand_node(current_node, heuristics, True, node_queue, known_states)
+            current_node = node_queue.get()
+            if (heuristics == get_hamming and current_node.h <= 6) or (heuristics == get_manhattan and current_node.h <= 19):
+                sub_problem_solved = True
 
     end_time = time.time()
     if heuristics == get_hamming:
