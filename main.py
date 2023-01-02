@@ -1,4 +1,5 @@
 import numpy
+import math
 import time
 from queue import PriorityQueue
 
@@ -7,6 +8,7 @@ from generator import *
 
 # class for nodes in the search-tree
 class Node:
+    # The Class Constructor
     def __init__(self, g, h, puzzle_state, parent_node):
         self.g = g  # cost (number of moves) accumulated to reach this node
         self.h = h  # estimation of cost to reach the goal state from this node
@@ -95,10 +97,14 @@ def expand_node(n, heuristics, sub_problem, node_queue, known_states):
             known_states[hash_puzzle(new_state)] = True
 
 
+# checks if the Puzzle is solvable.
+# puzzle is solvable if number of inversions is even
+# an inversion is when a number is smaller than a previous number, when reading the array
+# from top to bottom and left to right (the empty tile 0 is not counted)
+# parameters:
+# - start_array ((3x3 int numpy array): the Start State of the Puzzle
+# return value (boolean) : False means the puzzle is not solvable and True means it is solvable.
 def validate_solvable(start_array):
-    # puzzle is solvable if number of inversions is even
-    # an inversion is when a number is smaller than a previous number, when reading the array
-    # from top to bottom and left to right (the empty tile 0 is not counted)
     inversions = 0
 
     # first, we convert the 2d array to a 1d array, excluding 0
@@ -122,6 +128,11 @@ def validate_solvable(start_array):
         return True
 
 
+# The method checks if the specified move is allowed on this node.
+# parameters:
+# -  node (Node):the node for which the move shall be checked
+# - direction (String): the four possible directions for a move. Valid option are: up, down, right and left
+# return value (boolean): True means the move is allowed and false means the move is not possible.
 def validate_move(node, direction):
     # get column and row of the empty tile, to check in which direction we can move it
     row_of_0 = 0
@@ -274,6 +285,16 @@ def solve100():
             print(counter)
 
 
+def standard_deviation(value_array):
+    mean = numpy.sum(value_array)/100
+    sum_of_squares = 0
+    for i in range(0, 100):
+        sum_of_squares += math.pow(value_array[0] - mean, 2)
+    variance = numpy.sum(sum_of_squares/100)
+    deviation = math.sqrt(variance)
+    return deviation
+
+
 solve100()
 
 # print results
@@ -283,4 +304,6 @@ print("avg. nodes: ", numpy.sum(hamming_nodes)/100)
 print("manhattan:")
 print("avg. time: ", numpy.sum(manhattan_time)/100)
 print("avg. nodes: ", numpy.sum(manhattan_nodes)/100)
+print("standard deviation: ", standard_deviation(hamming_time))
+print("standard deviation: ", standard_deviation(manhattan_time))
 
