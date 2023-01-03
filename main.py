@@ -3,8 +3,6 @@ import math
 import time
 from queue import PriorityQueue
 
-from generator import *
-
 
 # class for nodes in the search-tree
 class Node:
@@ -217,10 +215,10 @@ def get_manhattan(start_array, goal_array, sub_problem):
 # - p (3x3 int numpy array): puzzle to be hashed
 # return value (int): hash value
 def hash_puzzle(p):
-    hash = (p[0][0] * 100000000 + p[0][1] * 10000000 + p[0][2] * 1000000
-            + p[1][0] * 100000 + p[1][1] * 10000 + p[1][2] * 1000
-            + p[2][0] * 100 + p[2][1] * 10 + p[2][2])
-    return hash
+    hash_value = (p[0][0] * 100000000 + p[0][1] * 10000000 + p[0][2] * 1000000
+                  + p[1][0] * 100000 + p[1][1] * 10000 + p[1][2] * 1000
+                  + p[2][0] * 100 + p[2][1] * 10 + p[2][2])
+    return hash_value
 
 
 # find the position of a specified number in the array
@@ -359,4 +357,3 @@ print("avg. time: ", numpy.sum(manhattan_time)/100)
 print("SD time: ", standard_deviation(manhattan_time))
 print("avg. nodes: ", numpy.sum(manhattan_nodes)/100)
 print("SD nodes: ", standard_deviation(manhattan_nodes))
-
