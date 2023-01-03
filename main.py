@@ -319,7 +319,7 @@ def standard_deviation(value_array):
 
 
 # method for writing results to file
-# the file is structured as a csv (coma separated values) file
+# the file is structured as a csv (coma separated values, using ";" as a delimiter) file
 # parameters:
 # - filename (String): the filename und which to save the results
 def write_results(filename):
@@ -332,15 +332,15 @@ def write_results(filename):
     global manhattan_nodes
     global manhattan_expanded
     file = open(filename, 'w')
-    file.write("depth,hamming time,hamming t_nodes,hamming exp_nodes")
-    file.write(",manhattan time,manhattan t_nodes,manhattan exp_nodes\n")
+    file.write("depth;hamming time;hamming t_nodes;hamming exp_nodes")
+    file.write(";manhattan time;manhattan t_nodes;manhattan exp_nodes\n")
     for i in range(0, 100):
-        file.write(str(solution_depth[i]) + ",")
-        file.write(str(hamming_time[i]) + ",")
-        file.write(str(hamming_nodes[i]) + ",")
-        file.write(str(hamming_expanded[i]) + ",")
-        file.write(str(manhattan_time[i]) + ",")
-        file.write(str(manhattan_nodes[i]) + ",")
+        file.write(str(solution_depth[i]) + ";")
+        file.write(str(hamming_time[i]) + ";")
+        file.write(str(hamming_nodes[i]) + ";")
+        file.write(str(hamming_expanded[i]) + ";")
+        file.write(str(manhattan_time[i]) + ";")
+        file.write(str(manhattan_nodes[i]) + ";")
         file.write(str(manhattan_expanded[i]) + "\n")
     print("...done")
 
