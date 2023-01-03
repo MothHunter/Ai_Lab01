@@ -29,15 +29,20 @@ class Node:
 goal_state = numpy.array([[0, 1, 2],
                           [3, 4, 5],
                           [6, 7, 8]])   # the state in which the puzzle counts as solved
-n_nodes = 0                         # number of nodes created while solving a single puzzle
-n_expanded = 0                      # number of expanded nodes while solving a single puzzle
-hamming_time = numpy.zeros(100)     # array for storing hamming solve times
-hamming_nodes = numpy.zeros(100)    # array for storing hamming node numbers
-manhattan_time = numpy.zeros(100)   # array for storing manhattan solve times
-manhattan_nodes = numpy.zeros(100)  # array for storing manhattan node numbers
-counter = 0                         # counter for solved puzzles of this run
+n_nodes = 0                             # number of nodes created while solving a single puzzle
+n_expanded = 0                          # number of expanded nodes while solving a single puzzle
+hamming_time = numpy.zeros(100)         # array for storing hamming solve times
+hamming_nodes = numpy.zeros(100)        # array for storing hamming node numbers
+hamming_expanded = numpy.zeros(100)     # array for storing hamming expanded node numbers
+manhattan_time = numpy.zeros(100)       # array for storing manhattan solve times
+manhattan_nodes = numpy.zeros(100)      # array for storing manhattan node numbers
+manhattan_expanded = numpy.zeros(100)   # array for storing manhattan expanded node numbers
+solution_depth = numpy.zeros(100)       # array for soring the number of steps needed to solve the puzzle
+counter = 0                             # counter for solved puzzles of this run
 
 
+# generate a random start state for an 8-puzzle
+# return value (3x3 int Numpy array): the generated puzzle
 def generate_puzzle():
     random_generator_puzzle = numpy.random.choice(numpy.arange(9), size=(3, 3), replace=False)
     return random_generator_puzzle
@@ -249,11 +254,13 @@ def solve_8puzzle(start_state, heuristics):
     node_queue = PriorityQueue()
     known_states = {hash_puzzle(start_state): True}
     global n_nodes
+    global n_expanded
     n_nodes = 0
+    n_expanded = 0
     start_time = time.time()
     sub_problem_solved = False
-    while current_node.h != 0:
-        if sub_problem_solved:
+    while current_node.h != 0:  # the goal state has not yet been reached
+        if sub_problem_solved:  # the sub-problem has been solved, now using heuristics for full puzzle
             expand_node(current_node, heuristics, False, node_queue, known_states)
             current_node = node_queue.get()
         else:
@@ -268,10 +275,14 @@ def solve_8puzzle(start_state, heuristics):
         global hamming_time
         hamming_time[counter] = end_time - start_time
         hamming_nodes[counter] = n_nodes
+        hamming_expanded[counter] = n_expanded
     elif heuristics == get_manhattan:
         global manhattan_time
+        global solution_depth
         manhattan_time[counter] = end_time - start_time
         manhattan_nodes[counter] = n_nodes
+        manhattan_expanded[counter] = n_expanded
+        solution_depth[counter] = current_node.g
     else:
         print("undefined heuristic")
     return current_node
@@ -292,17 +303,50 @@ def solve100():
                 print(counter)
 
 
+# calculates the standard deviation of the values in an array
+# parameters:
+# - value_array (1D Numpy array): the values
+# return value (real): the standard deviation of the values from value_array
 def standard_deviation(value_array):
-    mean = numpy.sum(value_array)/100
+    n_vals = len(value_array)
+    mean = numpy.sum(value_array)/n_vals
     sum_of_squares = 0
-    for i in range(0, 100):
+    for i in range(0, n_vals):
         sum_of_squares += math.pow(value_array[i] - mean, 2)
-    variance = numpy.sum(sum_of_squares)/100
+    variance = numpy.sum(sum_of_squares)/n_vals
     deviation = math.sqrt(variance)
     return deviation
 
 
+# method for writing results to file
+# the file is structured as a csv (coma separated values) file
+# parameters:
+# - filename (String): the filename und which to save the results
+def write_results(filename):
+    print("Writing results to file...")
+    global solution_depth
+    global hamming_time
+    global hamming_nodes
+    global hamming_expanded
+    global manhattan_time
+    global manhattan_nodes
+    global manhattan_expanded
+    file = open(filename, 'w')
+    file.write("depth,hamming time,hamming t_nodes,hamming exp_nodes")
+    file.write(",manhattan time,manhattan t_nodes,manhattan exp_nodes\n")
+    for i in range(0, 100):
+        file.write(str(solution_depth[i]) + ",")
+        file.write(str(hamming_time[i]) + ",")
+        file.write(str(hamming_nodes[i]) + ",")
+        file.write(str(hamming_expanded[i]) + ",")
+        file.write(str(manhattan_time[i]) + ",")
+        file.write(str(manhattan_nodes[i]) + ",")
+        file.write(str(manhattan_expanded[i]) + "\n")
+    print("...done")
+
+
 solve100()
+write_results("results.csv")
 
 # print results
 print("hamming:")
