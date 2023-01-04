@@ -49,12 +49,11 @@ def generate_puzzle():
 # expand_node to creat all possible next  steps puzzle state from the given state
 # if the move in one or more direction possible it creat the node
 # parameters:
-#  - n(Node) the node for expantion
+#  - n(Node) the node for expansion
 #  - heuristics (function) is for manhattan or hamming
-#  - sub_problem (boolean) true: use sub_problem version of the distance function
 #  - node_queue (priority Queue)
 #  - Known_state (dictionary) key is the hash puzzle function and the value is boolean(true)
-def expand_node(n, heuristics, sub_problem, node_queue, known_states):
+def expand_node(n, heuristics, node_queue, known_states):
     # the "global" keyword tells the function to use the global variable of this name
     global goal_state
     global n_nodes
@@ -69,7 +68,7 @@ def expand_node(n, heuristics, sub_problem, node_queue, known_states):
         new_state[p0[0] - 1][p0[1]] = 0
         # if this new state of puzzle does not exist in hash map then create node and add it to the Queue
         if known_states.get(hash_puzzle(new_state)) is None:
-            new_node = Node(n.g + 1, heuristics(new_state, goal_state, sub_problem), new_state, n)
+            new_node = Node(n.g + 1, heuristics(new_state, goal_state), new_state, n)
             node_queue.put(new_node)
             n.child_nodes.append(new_node)
             known_states[hash_puzzle(new_state)] = True
@@ -79,7 +78,7 @@ def expand_node(n, heuristics, sub_problem, node_queue, known_states):
         new_state[p0[0]][p0[1]] = new_state[p0[0]+1][p0[1]]
         new_state[p0[0] + 1][p0[1]] = 0
         if known_states.get(hash_puzzle(new_state)) is None:
-            new_node = Node(n.g + 1, heuristics(new_state, goal_state, sub_problem), new_state, n)
+            new_node = Node(n.g + 1, heuristics(new_state, goal_state), new_state, n)
             node_queue.put(new_node)
             n.child_nodes.append(new_node)
             known_states[hash_puzzle(new_state)] = True
@@ -89,7 +88,7 @@ def expand_node(n, heuristics, sub_problem, node_queue, known_states):
         new_state[p0[0]][p0[1]] = new_state[p0[0]][p0[1]+1]
         new_state[p0[0]][p0[1] + 1] = 0
         if known_states.get(hash_puzzle(new_state)) is None:
-            new_node = Node(n.g + 1, heuristics(new_state, goal_state, sub_problem), new_state, n)
+            new_node = Node(n.g + 1, heuristics(new_state, goal_state), new_state, n)
             node_queue.put(new_node)
             n.child_nodes.append(new_node)
             known_states[hash_puzzle(new_state)] = True
@@ -99,7 +98,7 @@ def expand_node(n, heuristics, sub_problem, node_queue, known_states):
         new_state[p0[0]][p0[1]] = new_state[p0[0]][p0[1]-1]
         new_state[p0[0]][p0[1] - 1] = 0
         if known_states.get(hash_puzzle(new_state)) is None:
-            new_node = Node(n.g + 1, heuristics(new_state, goal_state, sub_problem), new_state, n)
+            new_node = Node(n.g + 1, heuristics(new_state, goal_state), new_state, n)
             node_queue.put(new_node)
             n.child_nodes.append(new_node)
             known_states[hash_puzzle(new_state)] = True
@@ -165,48 +164,31 @@ def validate_move(node, direction):
 
 
 # calculate the hamming distance
-# if sub_problem is true, only the lower row of the puzzle is considered
 # parameters:
 # - current_array (3x3 int numpy array): current state of the puzzle
 # - goal_array (3x3 int numpy array): solved state of the puzzle
-# - sub_problem (boolean): True = only solve lower row; False = solve whole puzzle
 # return value (int): distance
-def get_hamming(current_array, goal_array, sub_problem):
+def get_hamming(current_array, goal_array):
     difference = 0
-    if sub_problem:
-        difference = 6
+    for r in range(0, 3):
         for c in range(0, 3):
-            if current_array[2][c] != goal_array[2][c]:
+            if current_array[r][c] != goal_array[r][c]:
                 difference += 1
-    else:
-        for r in range(0, 3):
-            for c in range(0, 3):
-                if current_array[r][c] != goal_array[r][c]:
-                    difference += 1
     return difference
 
 
 # calculate manhattan distance
-# if sub_problem is true, only the lower row of the puzzle is considered
 # parameters:
 # - current_array (3x3 int numpy array): current state of the puzzle
 # - goal_array (3x3 int numpy array): solved state of the puzzle
-# - sub_problem (boolean): True = only solve lower row; False = solve whole puzzle
 # return value (int): distance
-def get_manhattan(start_array, goal_array, sub_problem):
+def get_manhattan(start_array, goal_array):
     distance = 0
-    if sub_problem:
-        distance = 19
+    for r in range(0, 3):
         for c in range(0, 3):
-            position_in_goal = get_position(goal_array, start_array[2][c])
-            distance += abs(2 - position_in_goal[0])
+            position_in_goal = get_position(goal_array, start_array[r][c])
+            distance += abs(r - position_in_goal[0])
             distance += abs(c - position_in_goal[1])
-    else:
-        for r in range(0, 3):
-            for c in range(0, 3):
-                position_in_goal = get_position(goal_array, start_array[r][c])
-                distance += abs(r - position_in_goal[0])
-                distance += abs(c - position_in_goal[1])
     return distance
 
 
@@ -248,7 +230,7 @@ def get_cost(node):
 # - heuristics: the heuristic used to estimate the cost to get from a given state to the goal state
 # return value (Node): the goal state node (for purpose of backtracking of the path)
 def solve_8puzzle(start_state, heuristics):
-    current_node = Node(0, heuristics(start_state, goal_state, True), start_state, None)
+    current_node = Node(0, heuristics(start_state, goal_state), start_state, None)
     node_queue = PriorityQueue()
     known_states = {hash_puzzle(start_state): True}
     global n_nodes
@@ -256,18 +238,9 @@ def solve_8puzzle(start_state, heuristics):
     n_nodes = 0
     n_expanded = 0
     start_time = time.time()
-    sub_problem_solved = False
     while current_node.h != 0:  # the goal state has not yet been reached
-        if sub_problem_solved:  # the sub-problem has been solved, now using heuristics for full puzzle
-            expand_node(current_node, heuristics, False, node_queue, known_states)
-            current_node = node_queue.get()
-        else:
-            expand_node(current_node, heuristics, True, node_queue, known_states)
-            current_node = node_queue.get()
-            if (heuristics == get_hamming and current_node.h <= 6) or \
-                    (heuristics == get_manhattan and current_node.h <= 19):
-                sub_problem_solved = True
-
+        expand_node(current_node, heuristics, node_queue, known_states)
+        current_node = node_queue.get()
     end_time = time.time()
     if heuristics == get_hamming:
         global hamming_time
